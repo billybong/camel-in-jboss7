@@ -1,0 +1,92 @@
+Sample project leveraging JBoss 7 modules to keep the dependencies lightweight.
+
+Deploy to JBoss AS7 using: "mvn clean package jboss-as:deploy"
+Start JBoss using the previes JEE profile, "./standalone.sh --server-config=standalone-preview.xml"
+
+Switchyard 0.2 bundled in JBoss 7 was used, although the modules neede some changes to module.xml.
+The affected modules and their xml configuration are:
+
+org.apache.camel.core:2.8.0
+
+<module xmlns="urn:jboss:module:1.0" name="org.apache.camel.core" slot="2.8.0">
+
+    <resources>
+        <resource-root path="camel-core-2.8.0.jar"/>
+    </resources>
+
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="javax.xml.stream.api"/>
+        <module name="org.fusesource.commonman" slot="1.0"/>
+        <module name="org.apache.commons.logging"/>
+        <module name="org.slf4j"/>
+        <module name="org.switchyard.jaxb-impl" services="export" export="true"/>
+    </dependencies>
+</module>
+
+
+-------------------------------
+
+org.apache.camel.jms:2.8.0
+
+<module xmlns="urn:jboss:module:1.0" name="org.apache.camel.jms" slot="2.8.0">
+
+    <resources>
+        <resource-root path="camel-jms-2.8.0.jar"/>
+    </resources>
+
+    <dependencies>
+        <module name="org.apache.camel.core" slot="2.8.0"/>
+        <module name="org.apache.camel.spring" slot="2.8.0"/>
+        <module name="org.apache.commons.logging"/>
+	<module name="org.springframework"/>
+        <module name="javax.jms.api"/>
+	<module name="javax.api"/>
+	<module name="org.slf4j"/>
+    </dependencies>
+</module>
+
+---------------------------------
+
+org.apache.camel.spring:2.8.0
+
+<module xmlns="urn:jboss:module:1.0" name="org.apache.camel.spring" slot="2.8.0">
+
+    <resources>
+        <resource-root path="camel-spring-2.8.0.jar"/>
+    </resources>
+
+    <dependencies>
+        <module name="org.apache.camel.core" slot="2.8.0"/>
+        <module name="org.apache.commons.logging"/>
+        <module name="javax.jms.api"/>
+        <module name="org.springframework" export="false"/>
+    </dependencies>
+</module>
+
+---------------------------------
+
+org.springframework
+
+<module xmlns="urn:jboss:module:1.0" name="org.springframework">
+
+    <resources>
+        <resource-root path="spring-beans-3.0.5.RELEASE.jar"/>
+        <resource-root path="spring-core-3.0.5.RELEASE.jar"/>
+        <resource-root path="spring-context-3.0.5.RELEASE.jar"/>
+        <resource-root path="spring-jms-3.0.5.RELEASE.jar"/>
+        <resource-root path="spring-tx-3.0.5.RELEASE.jar"/>
+    </resources>
+
+    <dependencies>
+	<module name="javax.jms.api"/>    <!-- Could probably do with javax.api here instead.. -->
+	<module name="org.apache.commons.logging"/>
+    </dependencies>
+</module>
+
+
+TODO's
+-----------------
+
+- The flow works as expected, but the logging is only displaying randombly. Either none of the logs show up, or one of the inbound or outbound logs.
+- JMX is not currently working due to dependency problems which is shown during deployment. Probably the Camel main module needs dependencies on spring framework jmx logging.
